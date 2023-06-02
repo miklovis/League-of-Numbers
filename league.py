@@ -1,8 +1,13 @@
 import requests
 import json
+import os
+from dotenv import load_dotenv
 import time
 
-api_key = "RGAPI-ad331ebb-de59-49a2-a2a7-2f20a84c5119"
+
+load_dotenv()
+api_key = os.getenv("api_key") 
+print(api_key)
 
 puuid_api_url = "https://euw1.api.riotgames.com/lol/summoner/v4/summoners/by-name/{}?api_key={}"
 #summonerName = input("Enter your summoner name: ")
