@@ -43,10 +43,10 @@ data = {
     'kills': [],
     'deaths': [], 
     'assists': [],
-    'minionsKilled': [],
-    'visionScore': [],
+    'minions_killed': [],
+    'vision_score': [],
     'position': [], #0 for top, 1 for jungle, 2 for mid, 3 for ADC, 4 for support
-    'gameDuration': [],
+    'game_duration': [],
 }
 
 
@@ -65,8 +65,8 @@ for match in matchlist:
             data['deaths'].append(parts[index]["deaths"])
             data['kills'].append(parts[index]["kills"])
             data['assists'].append(parts[index]["assists"])
-            data['minionsKilled'].append(parts[index]["totalMinionsKilled"])
-            data['visionScore'].append(parts[index]["visionScore"])
+            data['minions_killed'].append(parts[index]["totalMinionsKilled"] + parts[index]["neutralMinionsKilled"])
+            data['vision_score'].append(parts[index]["visionScore"])
             match parts[index]["individualPosition"]:
                 case "TOP":
                     data['position'].append(0)
@@ -85,7 +85,7 @@ for match in matchlist:
 
                 case _:
                     continue
-            data['gameDuration'].append(responseJson["info"]["gameDuration"] / 60)
+            data['game_duration'].append(responseJson["info"]["gameDuration"] / 60)
             
             print("Game {} out of {}".format(matchlist.index(match), len(matchlist)))
         else:
