@@ -10,9 +10,8 @@ api_key = os.getenv("api_key")
 print(api_key)
 
 puuid_api_url = "https://euw1.api.riotgames.com/lol/summoner/v4/summoners/by-name/{}?api_key={}"
-#summonerName = input("Enter your summoner name: ")
+summonerName = input("Enter your summoner name: ")
 
-summonerName = "Phenomenalish"
 puuid_api_url_filled = puuid_api_url.format(summonerName, api_key)
 PUUID = requests.get(puuid_api_url_filled).json()["puuid"]
 
@@ -37,13 +36,18 @@ print(len(matchlist))
 
 match_api_url = "https://europe.api.riotgames.com/lol/match/v5/matches/{}?api_key={}"
 
-data = []
-kills = []
-deaths = []
-assists = []
-outcomes = []
-gameDuration = []
-totalMinionsKilled = []
+
+
+data = {
+    'outcome': [],
+    'kills': [],
+    'deaths': [], 
+    'assists': [],
+    'minionsKilled': [],
+    'visionScore': [],
+    'position': [], #0 for top, 1 for jungle, 2 for mid, 3 for ADC, 4 for support
+    'gameDuration': [],
+}
 
 
 for match in matchlist:
@@ -57,13 +61,32 @@ for match in matchlist:
             summNames = [d["summonerName"] for d in parts]
             index = summNames.index(summonerName)
 
-            #data.append({"deaths": parts[index]["deaths"], "win": parts[index]["win"]})
-            deaths.append(parts[index]["deaths"])
-            kills.append(parts[index]["kills"])
-            assists.append(parts[index]["assists"])
-            outcomes.append(int(parts[index]["win"]))
-            totalMinionsKilled.append(parts[index]["totalMinionsKilled"])
-            gameDuration.append(responseJson["info"]["gameDuration"] / 60)
+            data['outcome'].append(int(parts[index]["win"]))
+            data['deaths'].append(parts[index]["deaths"])
+            data['kills'].append(parts[index]["kills"])
+            data['assists'].append(parts[index]["assists"])
+            data['minionsKilled'].append(parts[index]["totalMinionsKilled"])
+            data['visionScore'].append(parts[index]["visionScore"])
+            match parts[index]["individualPosition"]:
+                case "TOP":
+                    data['position'].append(0)
+                
+                case "JUNGLE":
+                    data['position'].append(1)
+
+                case "MIDDLE":
+                    data['position'].append(2)
+
+                case "BOTTOM":
+                    data['position'].append(3)
+
+                case "UTILITY":
+                    data['position'].append(4)
+
+                case _:
+                    continue
+            data['gameDuration'].append(responseJson["info"]["gameDuration"] / 60)
+            
             print("Game {} out of {}".format(matchlist.index(match), len(matchlist)))
         else:
             if responseCode != 200:
@@ -72,26 +95,5 @@ for match in matchlist:
         time.sleep(120)
 
     
-file = open("deaths.txt", "w")
-file.write(str(deaths))
-file.close()
-
-file = open("outcomes.txt", "w")
-file.write(str(outcomes))
-file.close()
-
-file = open("kills.txt", "w")
-file.write(str(kills))
-file.close()
-
-file = open("assists.txt", "w")
-file.write(str(assists))
-file.close()
-
-file = open("duration.txt", "w")
-file.write(str(gameDuration))
-file.close()
-
-file = open("creeps.txt", "w")
-file.write(str(totalMinionsKilled))
-file.close()
+with open('data.json', 'w') as file:
+    json.dump(data, file, ensure_ascii=True)

@@ -1,29 +1,25 @@
 import numpy as np
 import json
 import matplotlib.pyplot as plt
+import timeit
 from scipy.stats import pointbiserialr
 
 # Sample data (replace with your own data)
-with open("duration.txt", 'r') as file:
-    durations = json.load(file)
+with open("data.json", 'r') as file:
+    data = json.load(file)
 
-with open("deaths.txt", 'r') as file:
-    deaths = json.load(file)
+data['creepsPerMinute'] = [round(creeps / minutes, 2) for creeps, minutes in zip(data['minionsKilled'], data['gameDuration'])]
+data['killsPerMinute'] = [round(kills / minutes, 2) for kills, minutes in zip(data['kills'], data['gameDuration'])]
+data['deathsPerMinute'] = [round(deaths / minutes, 2) for deaths, minutes in zip(data['deaths'], data['gameDuration'])]
+data['assistsPerMinute'] = [round(assists / minutes, 2) for assists, minutes in zip(data['assists'], data['gameDuration'])]
+data['KDA'] = []
+for i in range(len(data)):
+    if data['deaths'][i] != 0:
+        data['KDA'].append(round((data['kills'][i] + data['assists'][i]) / data['deaths'][i], 2))
+    else: 
+        data['KDA'].append(data['kills'][i] + data['assists'][i])
 
-with open("outcomes.txt", 'r') as file:
-    outcomes = json.load(file)
-
-with open("kills.txt", 'r') as file:
-    kills = json.load(file)
-
-with open("assists.txt", 'r') as file:
-    assists = json.load(file)
-
-with open("creeps.txt", 'r') as file:
-    creeps = json.load(file)
-# Calculate correlation coefficient
-
-
+'''
 kda = []
 deathsPM = []
 killsPM = []
@@ -63,7 +59,7 @@ assistsPM_false = [assistsPM[i] for i in range(len(assists)) if not outcomes[i]]
 creepsPM_true = [creepsPM[i] for i in range(len(creeps)) if outcomes[i]]
 creepsPM_false = [creepsPM[i] for i in range(len(creeps)) if not outcomes[i]]
 
-
+# Calculate correlation coefficient
 correlationDeaths = np.corrcoef(deaths, outcomes)[0, 1]
 correlationDeathsPM = np.corrcoef(deathsPM, outcomes)[0, 1]
 
@@ -114,3 +110,4 @@ plt.tight_layout()
 
 # Show the plots
 plt.show()
+'''
