@@ -6,7 +6,8 @@ from scipy.stats import pointbiserialr
 
 correlation_data = {}
 df = {}
-per_minute_stats = { "kills", "deaths", "assists", "vision_score", "minions_killed"}
+per_minute_stats = {    "kills", "deaths", "assists", "vision_score", "minions_killed", 
+                        "net_kills", "net_deaths", "net_assists", "net_minions_killed", "net_vision_score"}
 
 def calculate_per_minute_stat(df, x, y):
     new_stat = x + "_per_minute"
