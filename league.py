@@ -3,17 +3,18 @@ import json
 import os
 from dotenv import load_dotenv
 import time
+import correlation
 
 
 load_dotenv()
 api_key = os.getenv("api_key") 
-print(api_key)
 
 puuid_api_url = "https://euw1.api.riotgames.com/lol/summoner/v4/summoners/by-name/{}?api_key={}"
 summonerName = input("Enter your summoner name: ")
 
 puuid_api_url_filled = puuid_api_url.format(summonerName, api_key)
 PUUID = requests.get(puuid_api_url_filled).json()["puuid"]
+folder_path = f"data/{PUUID}"
 
 
 match_history_api_url = "https://europe.api.riotgames.com/lol/match/v5/matches/by-puuid/{}/ids?startTime=1673312400&queue=420&type=ranked&start={}&count=100&api_key={}"
@@ -32,11 +33,7 @@ while(len(responseJson) == 100):
     responseCode = response.status_code
     matchlist = matchlist + responseJson
 
-print(len(matchlist))
-
 match_api_url = "https://europe.api.riotgames.com/lol/match/v5/matches/{}?api_key={}"
-
-
 
 data = {
     'outcome': [],
@@ -87,13 +84,20 @@ for match in matchlist:
                     continue
             data['game_duration'].append(responseJson["info"]["gameDuration"] / 60)
             
-            print("Game {} out of {}".format(matchlist.index(match), len(matchlist)))
+            print("Game {} out of {}".format(matchlist.index(match) + 1, len(matchlist)))
         else:
             if responseCode != 200:
                 raise KeyError()
     except KeyError:
         time.sleep(120)
 
+
+os.makedirs(folder_path, exist_ok=True)
+with open(f'data/{PUUID}/{PUUID}_matchlist.json', 'w') as file:
+    json.dump(matchlist, file, ensure_ascii=True)
     
-with open('data.json', 'w') as file:
+with open(f'data/{PUUID}/{PUUID}_data.json', 'w') as file:
     json.dump(data, file, ensure_ascii=True)
+
+
+correlation.main()
