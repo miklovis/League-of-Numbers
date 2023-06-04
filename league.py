@@ -28,6 +28,10 @@ data = {
     'assists': [],
     'minions_killed': [],
     'vision_score': [],
+    'experience': [],
+    'gold_earned': [],
+    'damage_dealt': [],
+    'kda': [],
     'position': [], #0 for top, 1 for jungle, 2 for mid, 3 for ADC, 4 for support
     'kill_participation': [],
     'game_duration': [],
@@ -37,7 +41,11 @@ data = {
     'net_assists': [],
     'net_minions_killed': [],
     'net_vision_score': [],
-    'net_kill_participation': []
+    'net_kill_participation': [],
+    'net_experience': [],
+    'net_gold_earned': [],
+    'net_damage_dealt': [],
+
 }
 
 
@@ -87,8 +95,13 @@ for match in matchlist:
             data['kills'].append(parts[index]["kills"])
             data['assists'].append(parts[index]["assists"])
             data['minions_killed'].append(parts[index]["totalMinionsKilled"] + parts[index]["neutralMinionsKilled"])
-            data['kill_participation'].append(round(parts[index]["challenges"]["killParticipation"], 2))
             data['vision_score'].append(parts[index]["visionScore"])
+            data['kill_participation'].append(round(parts[index]["challenges"]["killParticipation"], 2))
+            data['experience'].append(parts[index]["champExperience"])
+            data['gold_earned'].append(parts[index]["goldEarned"])
+            data['damage_dealt'].append(parts[index]["totalDamageDealt"])
+            data['kda'].append(parts[index]["challenges"]["kda"])
+            
             match parts[index]["individualPosition"]:
                 case "TOP":
                     data['position'].append(0)
@@ -139,11 +152,15 @@ for match in matchlist:
             data['net_assists'].append(parts[index]["assists"] - parts[enemyIndex]["assists"])
             data['net_minions_killed'].append((parts[index]["totalMinionsKilled"] + parts[index]["neutralMinionsKilled"]) - (parts[enemyIndex]["totalMinionsKilled"] + parts[enemyIndex]["neutralMinionsKilled"]))
             data['net_vision_score'].append(parts[index]["visionScore"] - parts[enemyIndex]["visionScore"])
+            if "killParticipation" not in parts[enemyIndex]["challenges"]:
+                parts[enemyIndex]["challenges"]["killParticipation"] = 0
             data['net_kill_participation'].append(parts[index]["challenges"]["killParticipation"] - parts[enemyIndex]["challenges"]["killParticipation"])
+            data['net_experience'].append(parts[index]["champExperience"] - parts[enemyIndex]["champExperience"])
+            data['net_gold_earned'].append(parts[index]["goldEarned"] - parts[enemyIndex]["goldEarned"])
+            data['net_damage_dealt'].append(parts[index]["totalDamageDealt"] - parts[enemyIndex]["totalDamageDealt"])
 
 
-
-            data['game_duration'].append(responseJson["info"]["gameDuration"] / 60)
+            data['game_duration'].append(responseJson["info"]["gameDuration"] / 60) 
             
             print("Game {} out of {}".format(matchlist.index(match) + 1, len(matchlist)))
         else:
