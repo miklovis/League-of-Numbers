@@ -1,6 +1,7 @@
 import numpy as np
 import json
 import matplotlib.pyplot as plt
+import sys
 import pandas as pd
 from scipy.stats import pointbiserialr
 
@@ -51,41 +52,61 @@ def main(PUUID):
         calculate_per_minute_stat(df, stat, "game_duration")
 
     position = 0
-    choice = input("If you want to check the stats of a single position write 'position'. If you want to want to check stats of all lanes combined, write 'stats', If you want to quit the program, type 'quit'. ")
-    if choice.lower() == "position":
-        choice = int(input("Type 0 for top, 1 for jungle, 2 for mid, 3 for bot/adc, 4 for support: "))
-        try:
-            if 0 <= choice <= 4:
-                position = choice + 1
-        except ValueError:
-            print("Invalid input.")
-
-    if position == 0:
-        df_position = df
-        df_victories = df[df['outcome'] == 1]
-        df_losses = df[df['outcome'] == 0]
-    else:
-        conditionW = (df['position'] == position-1) & (df['outcome'] == 1)
-        conditionL = (df['position'] == position-1) & (df['outcome'] == 0)
-        df_position = df[df['position'] == position-1]
-        df_victories = df[conditionW]
-        df_losses = df[conditionL]
-
-    for column_name in df_position.columns[1:]:
-        calculate_corr(df_position, column_name, df_position.columns[0])
-
-    corr_data = pd.DataFrame(correlation_data, index=[0])
-    corr_data.transpose().to_csv("data/corr_data.csv", index=True)
 
     while True:
-        print(df.columns[1:].tolist())
-        print("If you want to quit the program, type 'quit'.")
-        choice = input("Choose a category you would like to see the comparison for: ").lower()
-        if choice == "quit":
-            break
-        else:
-            create_box_plot(df_victories, df_losses, position, choice)
+        try:
+            choice = input("If you want to check the stats of a single position write 'position'. If you want to want to check stats of all lanes combined, write 'stats', If you want to quit the program, type 'quit'. ")
+            if choice.lower() == "position":
+                choice = int(input("Type 0 for top, 1 for jungle, 2 for mid, 3 for bot/adc, 4 for support: "))
+                if 0 <= choice <= 4:
+                    position = choice + 1
+                    break
+                else:
+                    raise ValueError()
+            elif choice.lower() == "stats":
+                position == 0
+                break
+            elif choice.lower() == "quit":
+                break
+            else:
+                raise ValueError()        
+                
+        except ValueError:
+            print("Invalid input1.")
+        
+    while True:
+        try:
+            if position == 0:
+                df_position = df
+                df_victories = df[df['outcome'] == 1]
+                df_losses = df[df['outcome'] == 0]
+            else:
+                conditionW = (df['position'] == position-1) & (df['outcome'] == 1)
+                conditionL = (df['position'] == position-1) & (df['outcome'] == 0)
+                df_position = df[df['position'] == position-1]
+                df_victories = df[conditionW]
+                df_losses = df[conditionL]
+
+            for column_name in df_position.columns[1:]:
+                calculate_corr(df_position, column_name, df_position.columns[0])
+                
+            print(df.columns[1:].tolist())
+            print("If you want to quit the program, type 'quit'.")
+            choice = input("Choose a category you would like to see the comparison for: ").lower()
+            if choice == "quit":
+                break
+            elif choice in df.columns[1:]:
+                create_box_plot(df_victories, df_losses, position, choice)
+            else:
+                raise ValueError()
+                
+            
+            
+        except ValueError:
+            print("Invalid input2.")
+        
+        
 
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv[1])

@@ -10,10 +10,12 @@ load_dotenv()
 api_key = os.getenv("api_key") 
 
 puuid_api_url = "https://euw1.api.riotgames.com/lol/summoner/v4/summoners/by-name/{}?api_key={}"
-summonerName = input("Enter your summoner name: ")
+summonerName = input("Enter your summoner name: ").lower()
 
 puuid_api_url_filled = puuid_api_url.format(summonerName, api_key)
-PUUID = requests.get(puuid_api_url_filled).json()["puuid"]
+response = requests.get(puuid_api_url_filled).json()
+PUUID = response["puuid"]
+summonerName = response["name"]
 folder_path = f"data/{PUUID}/"
 
 
@@ -51,7 +53,6 @@ data = {
     'net_team_barons': []
 
 }
-
 
 cached_matchlist = []
 
