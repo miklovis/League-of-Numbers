@@ -41,8 +41,8 @@ def create_box_plot(df_victories, df_losses, position, stat):
     plt.show()
 
 
-def main():
-    with open("data.json", 'r') as file:
+def main(PUUID):
+    with open(f"data/{PUUID}/{PUUID}_data.json", 'r') as file:
         data = json.load(file)
 
     df = pd.DataFrame(data)
@@ -54,7 +54,6 @@ def main():
     choice = input("If you want to check the stats of a single position write 'position'. If you want to want to check stats of all lanes combined, write 'stats', If you want to quit the program, type 'quit'. ")
     if choice.lower() == "position":
         choice = int(input("Type 0 for top, 1 for jungle, 2 for mid, 3 for bot/adc, 4 for support: "))
-        print(choice)
         try:
             if 0 <= choice <= 4:
                 position = choice + 1
@@ -72,7 +71,6 @@ def main():
         df_victories = df[conditionW]
         df_losses = df[conditionL]
 
-    print(df_position)
     for column_name in df_position.columns[1:]:
         calculate_corr(df_position, column_name, df_position.columns[0])
 

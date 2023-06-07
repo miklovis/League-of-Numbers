@@ -33,6 +33,8 @@ data = {
     'damage_dealt': [],
     'kda': [],
     'position': [], #0 for top, 1 for jungle, 2 for mid, 3 for ADC, 4 for support
+    'team_dragons': [],
+    'team_barons': [],
     'kill_participation': [],
     'game_duration': [],
 
@@ -45,20 +47,20 @@ data = {
     'net_experience': [],
     'net_gold_earned': [],
     'net_damage_dealt': [],
+    'net_team_dragons': [],
+    'net_team_barons': []
 
 }
 
 
 cached_matchlist = []
-'''
+
 if os.path.exists(folder_path):
     with open(os.path.join(folder_path, f"{PUUID}_matchlist.json"), 'r') as file:
         cached_matchlist = json.load(file)
 
     with open(os.path.join(folder_path, f"{PUUID}_data.json"), 'r') as file:
         data = json.load(file)
-'''
-print(data)
 
 response = requests.get(api_url_filled)
 responseJson = response.json()
@@ -161,6 +163,22 @@ for match in matchlist:
 
 
             data['game_duration'].append(responseJson["info"]["gameDuration"] / 60) 
+
+            if parts[index]["teamId"] == 100:
+                data['team_dragons'].append(responseJson["info"]["teams"][0]["objectives"]["dragon"]["kills"])
+                data['team_barons'].append(responseJson["info"]["teams"][0]["objectives"]["dragon"]["kills"])
+
+                data['net_team_dragons'].append(responseJson["info"]["teams"][0]["objectives"]["dragon"]["kills"] - responseJson["info"]["teams"][1]["objectives"]["dragon"]["kills"])
+                data['net_team_barons'].append(responseJson["info"]["teams"][0]["objectives"]["baron"]["kills"] - responseJson["info"]["teams"][1]["objectives"]["baron"]["kills"])
+
+            else:
+                data['team_dragons'].append(responseJson["info"]["teams"][1]["objectives"]["dragon"]["kills"])
+                data['team_barons'].append(responseJson["info"]["teams"][1]["objectives"]["dragon"]["kills"])
+
+                data['net_team_dragons'].append(responseJson["info"]["teams"][1]["objectives"]["dragon"]["kills"] - responseJson["info"]["teams"][0]["objectives"]["dragon"]["kills"])
+                data['net_team_barons'].append(responseJson["info"]["teams"][1]["objectives"]["baron"]["kills"] - responseJson["info"]["teams"][0]["objectives"]["baron"]["kills"])
+                
+
             
             print("Game {} out of {}".format(matchlist.index(match) + 1, len(matchlist)))
         else:
@@ -168,7 +186,6 @@ for match in matchlist:
                 raise KeyError()
     except KeyError:
         time.sleep(120)
-
 
 os.makedirs(folder_path, exist_ok=True)
 with open(f'data/{PUUID}/{PUUID}_matchlist.json', 'w') as file:
@@ -182,4 +199,4 @@ with open('data.json', 'w') as file:
 
 
 
-correlation.main()
+correlation.main(PUUID)
