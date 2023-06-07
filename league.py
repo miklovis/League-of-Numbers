@@ -11,7 +11,32 @@ api_key = os.getenv("api_key")
 
 puuid_api_url = "https://euw1.api.riotgames.com/lol/summoner/v4/summoners/by-name/{}?api_key={}"
 summonerName = input("Enter your summoner name: ").lower()
+queue = 420
+while True:
+    queueType = input("Enter the queue type: 'solo' for ranked solo/duo, 'flex' for ranked flex, 'normal' for normal blind/draft: ").lower()
+    try:
+        if queueType == "solo":
+            queue = 420
+            break 
+        elif queueType == "flex":
+            queue = 440
+            break
+        elif queueType == "normal":
+            queue = 400
+            break
+        else:
+            raise ValueError
+    except ValueError:
+        print("Invalid input.")
 
+while True:
+    server = input("Enter the server you're playing on: ")
+    try:
+        break
+    except ValueError:
+        print("Invalid input.")
+        
+    
 puuid_api_url_filled = puuid_api_url.format(summonerName, api_key)
 response = requests.get(puuid_api_url_filled).json()
 PUUID = response["puuid"]
@@ -19,9 +44,9 @@ summonerName = response["name"]
 folder_path = f"data/{PUUID}/"
 
 
-match_history_api_url = "https://europe.api.riotgames.com/lol/match/v5/matches/by-puuid/{}/ids?startTime=1673312400&queue=420&type=ranked&start={}&count=100&api_key={}"
+match_history_api_url = "https://europe.api.riotgames.com/lol/match/v5/matches/by-puuid/{}/ids?startTime=1673312400&queue={}&start={}&count=100&api_key={}"
 matchlist = []
-api_url_filled = match_history_api_url.format(PUUID, len(matchlist), api_key)
+api_url_filled = match_history_api_url.format(PUUID, queue, len(matchlist), api_key)
 
 data = {
     'outcome': [],
@@ -189,15 +214,15 @@ for match in matchlist:
         time.sleep(120)
 
 os.makedirs(folder_path, exist_ok=True)
-with open(f'data/{PUUID}/{PUUID}_matchlist.json', 'w') as file:
+with open(f'data/{PUUID}/{PUUID}_{queueType}_matchlist.json', 'w') as file:
     json.dump(matchlist, file, ensure_ascii=True)
     
-with open(f'data/{PUUID}/{PUUID}_data.json', 'w') as file:
+with open(f'data/{PUUID}/{PUUID}_{queueType}_data.json', 'w') as file:
     json.dump(data, file, ensure_ascii=True)
 
-with open('data.json', 'w') as file:
-    json.dump(data, file, ensure_ascii=True)
+#with open('data.json', 'w') as file:
+#    json.dump(data, file, ensure_ascii=True)
 
 
 
-correlation.main(PUUID)
+correlation.main(PUUID, queueType)

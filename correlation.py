@@ -42,8 +42,8 @@ def create_box_plot(df_victories, df_losses, position, stat):
     plt.show()
 
 
-def main(PUUID):
-    with open(f"data/{PUUID}/{PUUID}_data.json", 'r') as file:
+def main(PUUID, queueType):
+    with open(f"data/{PUUID}/{PUUID}_{queueType}_data.json", 'r') as file:
         data = json.load(file)
 
     df = pd.DataFrame(data)
@@ -89,7 +89,7 @@ def main(PUUID):
 
             for column_name in df_position.columns[1:]:
                 calculate_corr(df_position, column_name, df_position.columns[0])
-                
+
             print(df.columns[1:].tolist())
             print("If you want to quit the program, type 'quit'.")
             choice = input("Choose a category you would like to see the comparison for: ").lower()
@@ -109,4 +109,4 @@ def main(PUUID):
 
 
 if __name__ == "__main__":
-    main(sys.argv[1])
+    main(sys.argv[1:2])
