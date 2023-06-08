@@ -8,8 +8,9 @@ import correlation
 
 load_dotenv()
 api_key = os.getenv("api_key") 
+server_list = {"euw", "eune"}
 
-puuid_api_url = "https://euw1.api.riotgames.com/lol/summoner/v4/summoners/by-name/{}?api_key={}"
+puuid_api_url = "https://{}1.api.riotgames.com/lol/summoner/v4/summoners/by-name/{}?api_key={}"
 summonerName = input("Enter your summoner name: ").lower()
 queue = 420
 while True:
@@ -30,14 +31,19 @@ while True:
         print("Invalid input.")
 
 while True:
-    server = input("Enter the server you're playing on: ")
+    server = input("Enter the server you're playing on: ").lower()
     try:
-        break
+        if server in server_list:
+            if server == "eune":
+                server = "eun"
+            break
+        else:
+            raise ValueError()
     except ValueError:
         print("Invalid input.")
         
     
-puuid_api_url_filled = puuid_api_url.format(summonerName, api_key)
+puuid_api_url_filled = puuid_api_url.format(server, summonerName, api_key)
 response = requests.get(puuid_api_url_filled).json()
 PUUID = response["puuid"]
 summonerName = response["name"]
@@ -82,10 +88,10 @@ data = {
 cached_matchlist = []
 
 if os.path.exists(folder_path):
-    with open(os.path.join(folder_path, f"{PUUID}_matchlist.json"), 'r') as file:
+    with open(os.path.join(folder_path, f"{PUUID}_{queueType}_matchlist.json"), 'r') as file:
         cached_matchlist = json.load(file)
 
-    with open(os.path.join(folder_path, f"{PUUID}_data.json"), 'r') as file:
+    with open(os.path.join(folder_path, f"{PUUID}_{queueType}_data.json"), 'r') as file:
         data = json.load(file)
 
 response = requests.get(api_url_filled)
@@ -113,10 +119,10 @@ for match in matchlist:
         if responseCode == 200 and responseJson["info"]["gameDuration"] > 210:
             parts = responseJson["info"]["participants"]
             summNames = [d["summonerName"] for d in parts]
-            roles = [d["individualPosition"] for d in parts]
+            individualPositions = [d["individualPosition"] for d in parts]
+            teamPositions = [d["teamPosition"] for d in parts]
             index = summNames.index(summonerName)
             enemyIndex = -1
-
 
             data['outcome'].append(int(parts[index]["win"]))
             data['deaths'].append(parts[index]["deaths"])
@@ -130,10 +136,10 @@ for match in matchlist:
             data['damage_dealt'].append(parts[index]["totalDamageDealt"])
             data['kda'].append(parts[index]["challenges"]["kda"])
             
-            match parts[index]["individualPosition"]:
+            match parts[index]["teamPosition"]:
                 case "TOP":
                     data['position'].append(0)
-                    for i, role in enumerate(roles):
+                    for i, role in enumerate(teamPositions):
                         if role == "TOP" and i != index:
                             enemyIndex = i
                             print(summNames[i] + " " + match)
@@ -141,21 +147,21 @@ for match in matchlist:
                 
                 case "JUNGLE":
                     data['position'].append(1)
-                    for i, role in enumerate(roles):
+                    for i, role in enumerate(teamPositions):
                         if role == "JUNGLE" and i != index:
                             enemyIndex = i
                             print(summNames[i] + " " + match)
 
                 case "MIDDLE":
                     data['position'].append(2)
-                    for i, role in enumerate(roles):
+                    for i, role in enumerate(teamPositions):
                         if role == "MIDDLE" and i != index:
                             enemyIndex = i
                             print(summNames[i] + " " + match)
 
                 case "BOTTOM":
                     data['position'].append(3)
-                    for i, role in enumerate(roles):
+                    for i, role in enumerate(teamPositions):
                         if role == "BOTTOM" and i != index:
                             enemyIndex = i
                             print(summNames[i] + " " + match)
@@ -163,17 +169,24 @@ for match in matchlist:
 
                 case "UTILITY":
                     data['position'].append(4)
-                    for i, role in enumerate(roles):
+                    for i, role in enumerate(teamPositions):
                         if role == "UTILITY" and i != index:
                             enemyIndex = i
                             print(summNames[i] + " " + match)
 
                 case _:
                     continue
+            
+            
 
             if enemyIndex == -1:
-                enemyIndex = roles.index("Invalid")
-                print(summNames[enemyIndex] + " " + match)
+                try:
+                    enemyIndex = individualPositions.index("Invalid")
+                    print(summNames[enemyIndex] + " " + match)
+                except ValueError:
+                    continue
+
+
 
             data['net_kills'].append(parts[index]["kills"] - parts[enemyIndex]["kills"])
             data['net_deaths'].append(parts[index]["deaths"] - parts[enemyIndex]["deaths"])

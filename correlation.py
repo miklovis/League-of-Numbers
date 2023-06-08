@@ -67,7 +67,7 @@ def main(PUUID, queueType):
                 position == 0
                 break
             elif choice.lower() == "quit":
-                break
+                sys.exit()
             else:
                 raise ValueError()        
                 
@@ -94,7 +94,7 @@ def main(PUUID, queueType):
             print("If you want to quit the program, type 'quit'.")
             choice = input("Choose a category you would like to see the comparison for: ").lower()
             if choice == "quit":
-                break
+                sys.exit()
             elif choice in df.columns[1:]:
                 create_box_plot(df_victories, df_losses, position, choice)
             else:
