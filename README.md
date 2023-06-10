@@ -11,6 +11,10 @@ League of Numbers is a Python project that allows you to store and analyze the g
 * Analyze the correlation between different statistics to identify patterns and trends.
 * Generate visualizations of the collected stats.
  
+ 
+## Prerequisites
+- Python 3.10
+- PiP
 ## Installation
 1. Clone the project repository
 2. In the terminal, create a .env file named ".env":
